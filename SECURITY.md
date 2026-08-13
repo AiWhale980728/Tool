@@ -2,8 +2,8 @@
 
 ## Current status
 
-Notch Relay is in pre-validation. It has passed automated and isolated end-to-end checks, but it has
-not yet completed live validation against real Codex and Claude user configurations.
+Notch Relay is pre-release software. Its background foundation has passed automated and isolated
+end-to-end checks, while the consumer-facing desktop application is still under development.
 
 Do not treat the current revision as production-ready.
 
