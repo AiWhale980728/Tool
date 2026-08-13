@@ -1,0 +1,48 @@
+.DS_Store
+.build/
+.build*/
+.swiftpm/
+
+# Xcode, editors, and local AI tooling
+DerivedData/
+*.xcuserstate
+*.xcuserdata/
+.idea/
+.vscode/
+.claude/
+.codex/
+.cursor/
+*.swp
+
+# Local visual references supplied for design comparison; never publish them
+/view/
+
+# Private product, design, research, and validation documentation
+/docs/
+
+# Secrets and signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.mobileprovision
+credentials.*
+secrets.*
+
+# Runtime data if a developer points --store at the repository
+/inbox/
+/archive/
+/quarantine/
+/backups/
+/logs/
+/bin/
+/state.json
+/daemon.json
+/installation.json
+
+# Real integration configuration must never be copied here
+/hooks.json
+/settings.json
+/local.notchrelay.processor.plist
