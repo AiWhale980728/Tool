@@ -22,6 +22,7 @@ if [[ "$developer_root" == "$clt_root" && -d "$manifest_sdk" && -d "$target_sdk"
         SWIFTPM_MODULECACHE_OVERRIDE="$scratch/module-cache" \
         swift test \
         --disable-sandbox \
+        --no-parallel \
         --scratch-path "$scratch" \
         --cache-path "$scratch/cache" \
         --sdk "$target_sdk" \
@@ -37,5 +38,5 @@ if [[ "$developer_root" == "$clt_root" && -d "$manifest_sdk" && -d "$target_sdk"
         -Xlinker -rpath \
         -Xlinker "$testing_interop"
 else
-    swift test
+    swift test --no-parallel
 fi

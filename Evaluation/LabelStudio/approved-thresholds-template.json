@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "replace-with-consented-dataset-id",
+  "datasetKind": "human_labeled_gold",
+  "thresholdApprovalID": "replace-with-product-and-evaluation-approval-id",
+  "approvedAt": "replace-with-iso-8601-approval-time",
+  "minimumAccuracy": "REPLACE_WITH_APPROVED_RATE",
+  "minimumPrecision": "REPLACE_WITH_APPROVED_RATE",
+  "minimumRecall": "REPLACE_WITH_APPROVED_RATE"
+}

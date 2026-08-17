@@ -9,17 +9,35 @@ let package = Package(
     ],
     products: [
         .library(name: "RelayCore", targets: ["RelayCore"]),
-        .executable(name: "relayctl", targets: ["RelayCLI"])
+        .executable(name: "relayctl", targets: ["RelayCLI"]),
+        .executable(name: "NotchRelayApp", targets: ["NotchRelayApp"])
+    ],
+    dependencies: [
+        .package(
+            url: "https://github.com/swiftlang/swift-subprocess.git",
+            exact: "1.0.0"
+        )
     ],
     targets: [
-        .target(name: "RelayCore"),
+        .target(
+            name: "RelayCore",
+            dependencies: [
+                .product(name: "Subprocess", package: "swift-subprocess")
+            ]
+        ),
         .executableTarget(
             name: "RelayCLI",
             dependencies: ["RelayCore"]
         ),
+        .executableTarget(
+            name: "NotchRelayApp",
+            dependencies: ["RelayCore"],
+            resources: [.process("Resources")]
+        ),
         .testTarget(
             name: "RelayCoreTests",
-            dependencies: ["RelayCore"]
+            dependencies: ["RelayCore"],
+            resources: [.process("Fixtures")]
         )
     ]
 )

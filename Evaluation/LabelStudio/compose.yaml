@@ -1,0 +1,15 @@
+services:
+  label-studio:
+    image: heartexlabs/label-studio:1.23.0@sha256:aa461572e8f9d86a1bf9520c1db620204e86160fd2f80dd7e9d40ac84a8828ea
+    pull_policy: never
+    restart: "no"
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./private/data:/label-studio/data
+    networks:
+      - annotation
+
+networks:
+  annotation:
+    internal: true

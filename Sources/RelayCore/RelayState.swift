@@ -91,6 +91,17 @@ public struct RelaySnapshot: Codable, Equatable, Sendable {
             return .stale
         }
 
+        if event.claimsUserConfirmation {
+            guard event.effectiveStatus == .completed,
+                  let targetEventID = event.userConfirmationTargetEventID,
+                  let existing = sessions[event.sessionKey],
+                  existing.status == .readyToReview,
+                  existing.lastEventID == targetEventID else {
+                updatedAt = max(updatedAt, event.receivedAt)
+                return .stale
+            }
+        }
+
         if var existing = sessions[event.sessionKey] {
             let wasWaiting = existing.status.requiresAttention
             let previousStatus = existing.status
@@ -175,9 +186,11 @@ public struct RelaySnapshot: Codable, Equatable, Sendable {
     @discardableResult
     public mutating func pruneExpired(
         now: Date = Date(),
-        policy: RelayRetentionPolicy = RelayRetentionPolicy()
+        policy: RelayRetentionPolicy = RelayRetentionPolicy(),
+        protectedSessionKeys: Set<String> = []
     ) -> [RelaySessionState] {
         let expiredKeys = sessions.keys.filter {
+            guard !protectedSessionKeys.contains($0) else { return false }
             if case .expired = cleanupState(for: $0, now: now, policy: policy) {
                 return true
             }

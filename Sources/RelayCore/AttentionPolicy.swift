@@ -45,37 +45,37 @@ public enum AttentionPolicy {
         case .completed:
             AttentionDecision(
                 level: .passive,
-                shouldNotify: !focusModeEnabled,
+                shouldNotify: false,
                 shouldPlaySound: !focusModeEnabled,
-                reason: "Evidence-backed completion is ready"
+                reason: "Evidence-backed completion is shown in Notch Relay"
             )
         case .readyToReview:
             AttentionDecision(
                 level: .passive,
-                shouldNotify: !focusModeEnabled,
+                shouldNotify: false,
                 shouldPlaySound: false,
-                reason: "Agent stopped and the result is ready to review"
+                reason: "Review-ready result is shown in Notch Relay"
             )
         case .needsInput:
             AttentionDecision(
                 level: .interrupt,
-                shouldNotify: true,
+                shouldNotify: false,
                 shouldPlaySound: false,
-                reason: "Agent cannot continue without user input"
+                reason: "Input request is shown in Notch Relay"
             )
         case .needsPermission:
             AttentionDecision(
                 level: .interrupt,
-                shouldNotify: true,
+                shouldNotify: false,
                 shouldPlaySound: false,
-                reason: "Agent is waiting for an explicit permission decision"
+                reason: "Permission request is shown in Notch Relay"
             )
         case .failed:
             AttentionDecision(
                 level: .critical,
-                shouldNotify: true,
+                shouldNotify: false,
                 shouldPlaySound: false,
-                reason: "Agent failed and may require recovery"
+                reason: "Failure is shown in Notch Relay"
             )
         case .cancelled:
             AttentionDecision(

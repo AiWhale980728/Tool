@@ -136,6 +136,17 @@ public struct CompletionEvidence: Codable, Equatable, Sendable {
         self.sourceID = sourceID.map { Self.normalized($0, limit: 256) }
     }
 
+    public var verifiesCompletion: Bool {
+        switch kind {
+        case .userConfirmed:
+            guard let sourceID else { return false }
+            return UUID(uuidString: sourceID) != nil
+        case .testPassed, .buildSucceeded, .artifactProduced, .deploymentAvailable,
+             .reviewAvailable, .providerSignal:
+            return true
+        }
+    }
+
     private enum CodingKeys: String, CodingKey {
         case kind
         case summary
@@ -185,7 +196,9 @@ public struct CompletionEvidenceBundle: Codable, Equatable, Sendable {
     }
 
     public var verifiesCompletion: Bool {
-        !items.isEmpty && items.count <= 8 && items.allSatisfy { !$0.summary.isEmpty }
+        !items.isEmpty
+            && items.count <= 8
+            && items.allSatisfy { !$0.summary.isEmpty && $0.verifiesCompletion }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -279,6 +292,18 @@ public struct RelayEvent: Codable, Equatable, Identifiable, Sendable {
     public var effectiveStatus: RelayStatus {
         guard status == .completed else { return status }
         return completionEvidence?.verifiesCompletion == true ? .completed : .readyToReview
+    }
+
+    public var claimsUserConfirmation: Bool {
+        status == .completed
+            && completionEvidence?.items.contains(where: { $0.kind == .userConfirmed }) == true
+    }
+
+    public var userConfirmationTargetEventID: UUID? {
+        guard claimsUserConfirmation,
+              let sourceID = completionEvidence?.items.first(where: { $0.kind == .userConfirmed })?.sourceID
+        else { return nil }
+        return UUID(uuidString: sourceID)
     }
 }
 

@@ -1,0 +1,1 @@
+{"cases":[{"category":"evidence-sufficient","id":"synthetic-label-case-01","label":true},{"category":"evidence-conflict","id":"synthetic-label-case-02","label":false}],"datasetID":"synthetic-label-studio-smoke-v1","datasetKind":"synthetic_smoke","schemaVersion":1,"thresholds":{"minimumAccuracy":0.5,"minimumPrecision":0.5,"minimumRecall":0.5}}

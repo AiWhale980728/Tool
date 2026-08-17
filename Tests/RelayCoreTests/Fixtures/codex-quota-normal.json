@@ -1,0 +1,32 @@
+{
+  "rateLimits": {
+    "limitId": "codex",
+    "planType": "plus",
+    "primary": {
+      "usedPercent": 28,
+      "windowDurationMins": 300,
+      "resetsAt": 1800000000
+    },
+    "secondary": {
+      "usedPercent": 63,
+      "windowDurationMins": 10080,
+      "resetsAt": 1800500000
+    },
+    "credits": {
+      "hasCredits": true,
+      "unlimited": false,
+      "balance": "12.5"
+    }
+  },
+  "rateLimitsByLimitId": {
+    "codex": {
+      "limitId": "codex",
+      "primary": { "usedPercent": 28, "windowDurationMins": 300 }
+    },
+    "spark": {
+      "limitId": "spark",
+      "limitName": "Codex Spark",
+      "primary": { "usedPercent": 90, "windowDurationMins": 300 }
+    }
+  }
+}

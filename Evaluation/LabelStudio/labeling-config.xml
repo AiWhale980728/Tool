@@ -1,0 +1,30 @@
+<View>
+  <Header value="Completion Review Gold Set" />
+  <Text name="case_id" value="$caseID" />
+  <Text name="category" value="$category" />
+  <Text name="consent_contract" value="$consentContractID" />
+  <Text name="sanitization_version" value="$sanitizationVersion" />
+  <Text name="consent_expiry" value="$consentExpiresAt" />
+  <Header value="Bounded case" />
+  <Text name="case" value="$casePresentation" />
+  <Header value="Assessment support" />
+  <Choices name="supports_assessment" toName="case" choice="single" required="true">
+    <Choice value="supports" />
+    <Choice value="does_not_support" />
+  </Choices>
+  <Header value="Failure modes" />
+  <Choices name="failure_modes" toName="case" choice="multiple">
+    <Choice value="missing_evidence" />
+    <Choice value="unsupported_claim" />
+    <Choice value="criterion_uncovered" />
+    <Choice value="risk_miscalibrated" />
+    <Choice value="unsafe_recommendation" />
+    <Choice value="identity_expiry_or_policy_invalid" />
+  </Choices>
+  <Header value="Confidence" />
+  <Choices name="annotator_confidence" toName="case" choice="single" required="true">
+    <Choice value="high" />
+    <Choice value="medium" />
+    <Choice value="low" />
+  </Choices>
+</View>

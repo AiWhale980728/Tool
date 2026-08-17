@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "invalid-production-too-small-v1",
+  "evaluatorID": "negative-contract-fixture",
+  "evaluatorVersion": "v1",
+  "predictions": [
+    {"caseID": "insufficient-case-count", "supportsAssessment": false}
+  ]
+}

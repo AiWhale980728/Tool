@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "replace-with-consented-dataset-id",
+  "datasetKind": "human_labeled_gold",
+  "thresholds": {
+    "minimumAccuracy": "REPLACE_WITH_APPROVED_RATE",
+    "minimumPrecision": "REPLACE_WITH_APPROVED_RATE",
+    "minimumRecall": "REPLACE_WITH_APPROVED_RATE"
+  },
+  "cases": [
+    {"id": "replace-with-anonymous-case-id", "category": "replace-with-category", "label": false}
+  ]
+}

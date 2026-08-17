@@ -44,8 +44,8 @@ struct IntegrationInstallerTests {
         let claudeAfter = try Data(contentsOf: fixture.layout.claudeConfiguration)
         #expect(String(decoding: codexAfter, as: UTF8.self).contains("/usr/bin/codex-user-hook"))
         #expect(String(decoding: claudeAfter, as: UTF8.self).contains("/usr/bin/claude-user-hook"))
-        #expect(try HookConfigurationEditor.managedHandlerCount(in: codexAfter, file: fixture.layout.codexConfiguration) == 4)
-        #expect(try HookConfigurationEditor.managedHandlerCount(in: claudeAfter, file: fixture.layout.claudeConfiguration) == 6)
+        #expect(try HookConfigurationEditor.managedHandlerCount(in: codexAfter, file: fixture.layout.codexConfiguration) == 6)
+        #expect(try HookConfigurationEditor.managedHandlerCount(in: claudeAfter, file: fixture.layout.claudeConfiguration) == 8)
 
         let secondPreview = try installer.preview(operation: .install)
         #expect(!secondPreview.changed)

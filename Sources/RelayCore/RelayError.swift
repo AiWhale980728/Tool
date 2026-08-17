@@ -2,6 +2,7 @@ import Foundation
 
 public enum RelayError: Error, LocalizedError, Equatable {
     case invalidPayload(String)
+    case invalidConfirmation(String)
     case unsupportedSource(String)
     case unsupportedStatus(String)
     case missingArgument(String)
@@ -11,6 +12,8 @@ public enum RelayError: Error, LocalizedError, Equatable {
         switch self {
         case .invalidPayload(let message):
             "Invalid hook payload: \(message)"
+        case .invalidConfirmation(let message):
+            "Completion confirmation rejected: \(message)"
         case .unsupportedSource(let source):
             "Unsupported agent source: \(source)"
         case .unsupportedStatus(let status):

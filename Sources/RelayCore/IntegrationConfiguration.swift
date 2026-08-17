@@ -308,14 +308,18 @@ public enum HookConfigurationEditor {
         case .codex:
             return [
                 HookSpecification(event: "SessionStart"),
+                HookSpecification(event: "UserPromptSubmit"),
                 HookSpecification(event: "PermissionRequest"),
+                HookSpecification(event: "PostToolUse"),
                 HookSpecification(event: "Stop"),
                 HookSpecification(event: "SessionEnd")
             ]
         case .claude:
             return [
                 HookSpecification(event: "SessionStart"),
+                HookSpecification(event: "UserPromptSubmit"),
                 HookSpecification(event: "PermissionRequest"),
+                HookSpecification(event: "PostToolUse"),
                 HookSpecification(
                     event: "Notification",
                     matcher: "idle_prompt|elicitation_dialog|elicitation_url_dialog|agent_needs_input|agent_completed"
