@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "synthetic-label-studio-smoke-v1",
+  "datasetKind": "synthetic_smoke",
+  "thresholdApprovalID": "synthetic-not-production-approved",
+  "approvedAt": "2026-08-16T00:00:00Z",
+  "minimumAccuracy": 0.5,
+  "minimumPrecision": 0.5,
+  "minimumRecall": 0.5
+}

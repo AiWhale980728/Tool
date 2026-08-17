@@ -2,6 +2,10 @@
 .build/
 .build*/
 .swiftpm/
+/dist/
+.venv/
+__pycache__/
+*.py[cod]
 
 # Xcode, editors, and local AI tooling
 DerivedData/
@@ -12,10 +16,17 @@ DerivedData/
 .claude/
 .codex/
 .cursor/
+.agents/
+/AGENTS.md
 *.swp
 
 # Local visual references supplied for design comparison; never publish them
 /view/
+/design-qa.md
+
+# Private product prompts are loaded locally and never published
+/Sources/NotchRelayApp/Resources/private-completion-review-system-prompt.txt
+/Sources/NotchRelayApp/Resources/private-independent-evaluator-system-prompt.txt
 
 # Private product, design, research, and validation documentation
 /docs/
@@ -30,6 +41,11 @@ DerivedData/
 *.mobileprovision
 credentials.*
 secrets.*
+
+# Evaluation inputs and outputs are consented, local-only data
+/Evaluation/OpenJudge/private/
+/Evaluation/OpenJudge/results/
+/Evaluation/LabelStudio/private/
 
 # Runtime data if a developer points --store at the repository
 /inbox/

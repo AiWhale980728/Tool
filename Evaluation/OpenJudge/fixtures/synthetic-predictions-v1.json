@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "completion-review-synthetic-smoke-v1",
+  "evaluatorID": "synthetic-integration-fixture",
+  "evaluatorVersion": "v1",
+  "predictions": [
+    {"caseID": "supported-complete-evidence", "supportsAssessment": true},
+    {"caseID": "rejected-missing-evidence", "supportsAssessment": false},
+    {"caseID": "supported-low-risk", "supportsAssessment": true},
+    {"caseID": "rejected-critical-risk", "supportsAssessment": false},
+    {"caseID": "supported-current-identity", "supportsAssessment": true},
+    {"caseID": "rejected-cross-task", "supportsAssessment": false}
+  ]
+}

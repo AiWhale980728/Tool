@@ -63,6 +63,23 @@ struct HookPayloadAdapterTests {
     }
 
     @Test
+    func testCodexAppConnectorPermissionCheckDoesNotClaimHumanApprovalIsPending() throws {
+        let event = try decode(
+            [
+                "hook_event_name": "PermissionRequest",
+                "session_id": "codex-session-connector",
+                "turn_id": "turn-connector",
+                "tool_name": "mcp__codex_apps__github__create_blob"
+            ],
+            source: .codex
+        )
+
+        #expect(event.status == .running)
+        #expect(event.attention == .silent)
+        #expect(event.summary == "Codex requires permission for mcp__codex_apps__github__create_blob")
+    }
+
+    @Test
     func testClaudeIdlePromptRequiresInput() throws {
         let event = try decode(
             [

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "synthetic-label-studio-smoke-v1",
+  "evaluatorID": "synthetic-independent-evaluator",
+  "evaluatorVersion": "synthetic-v1",
+  "predictions": [
+    {"caseID": "synthetic-label-case-01", "supportsAssessment": true},
+    {"caseID": "synthetic-label-case-02", "supportsAssessment": false}
+  ]
+}

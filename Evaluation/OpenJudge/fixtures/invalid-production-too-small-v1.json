@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "invalid-production-too-small-v1",
+  "datasetKind": "human_labeled_gold",
+  "thresholds": {
+    "minimumAccuracy": 0.8,
+    "minimumPrecision": 0.8,
+    "minimumRecall": 0.8
+  },
+  "cases": [
+    {"id": "insufficient-case-count", "category": "grounding", "label": false}
+  ]
+}

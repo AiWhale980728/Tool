@@ -1,0 +1,10 @@
+{
+  "rateLimits": {
+    "plan_type": "team",
+    "credits": {
+      "hasCredits": true,
+      "unlimited": false,
+      "balance": "4"
+    }
+  }
+}

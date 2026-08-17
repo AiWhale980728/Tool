@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "data": {
+      "caseID": "synthetic-label-case-01",
+      "category": "evidence-sufficient",
+      "consentContractID": "synthetic-consent-v1",
+      "consentExpiresAt": "2099-01-01T00:00:00Z",
+      "sanitizationVersion": "synthetic-v1",
+      "casePresentation": "Synthetic case with bounded tool evidence covering the acceptance criterion."
+    },
+    "annotations": [
+      {
+        "id": 101,
+        "completed_by": 11,
+        "was_cancelled": false,
+        "ground_truth": false,
+        "result": [
+          {"from_name": "supports_assessment", "to_name": "case", "type": "choices", "value": {"choices": ["supports"]}},
+          {"from_name": "annotator_confidence", "to_name": "case", "type": "choices", "value": {"choices": ["high"]}}
+        ]
+      },
+      {
+        "id": 102,
+        "completed_by": 12,
+        "was_cancelled": false,
+        "ground_truth": false,
+        "result": [
+          {"from_name": "supports_assessment", "to_name": "case", "type": "choices", "value": {"choices": ["supports"]}},
+          {"from_name": "annotator_confidence", "to_name": "case", "type": "choices", "value": {"choices": ["medium"]}}
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "data": {
+      "caseID": "synthetic-label-case-02",
+      "category": "evidence-conflict",
+      "consentContractID": "synthetic-consent-v1",
+      "consentExpiresAt": "2099-01-01T00:00:00Z",
+      "sanitizationVersion": "synthetic-v1",
+      "casePresentation": "Synthetic case with a completion claim that conflicts with bounded evidence."
+    },
+    "annotations": [
+      {
+        "id": 201,
+        "completed_by": 21,
+        "was_cancelled": false,
+        "ground_truth": false,
+        "result": [
+          {"from_name": "supports_assessment", "to_name": "case", "type": "choices", "value": {"choices": ["supports"]}},
+          {"from_name": "annotator_confidence", "to_name": "case", "type": "choices", "value": {"choices": ["low"]}}
+        ]
+      },
+      {
+        "id": 202,
+        "completed_by": 22,
+        "was_cancelled": false,
+        "ground_truth": false,
+        "result": [
+          {"from_name": "supports_assessment", "to_name": "case", "type": "choices", "value": {"choices": ["does_not_support"]}},
+          {"from_name": "failure_modes", "to_name": "case", "type": "choices", "value": {"choices": ["unsupported_claim"]}},
+          {"from_name": "annotator_confidence", "to_name": "case", "type": "choices", "value": {"choices": ["high"]}}
+        ]
+      },
+      {
+        "id": 203,
+        "completed_by": 23,
+        "was_cancelled": false,
+        "ground_truth": true,
+        "result": [
+          {"from_name": "supports_assessment", "to_name": "case", "type": "choices", "value": {"choices": ["does_not_support"]}},
+          {"from_name": "failure_modes", "to_name": "case", "type": "choices", "value": {"choices": ["unsupported_claim", "risk_miscalibrated"]}},
+          {"from_name": "annotator_confidence", "to_name": "case", "type": "choices", "value": {"choices": ["high"]}}
+        ]
+      }
+    ]
+  }
+]

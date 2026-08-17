@@ -152,6 +152,33 @@ struct RelayStateTests {
     }
 
     @Test
+    func testPinnedTerminalSessionIsExemptFromAutomaticCleanup() throws {
+        let completedAt = Date(timeIntervalSince1970: 100)
+        let evidence = try #require(CompletionEvidenceBundle([
+            CompletionEvidence(kind: .testPassed, summary: "Verified tests passed")
+        ]))
+        var snapshot = RelaySnapshot()
+        snapshot.apply(RelayEvent(
+            source: .codex,
+            sourceEvent: "verified",
+            sessionID: "pinned",
+            status: .completed,
+            summary: "Verified completion",
+            completionEvidence: evidence,
+            occurredAt: completedAt,
+            receivedAt: completedAt
+        ))
+
+        let removed = snapshot.pruneExpired(
+            now: completedAt.addingTimeInterval(25 * 60 * 60),
+            protectedSessionKeys: ["codex:pinned"]
+        )
+
+        #expect(removed.isEmpty)
+        #expect(snapshot.sessions["codex:pinned"] != nil)
+    }
+
+    @Test
     func testActiveAndReviewSessionsAreNeverAgePruned() {
         let old = Date(timeIntervalSince1970: 100)
         let now = old.addingTimeInterval(10 * 24 * 60 * 60)
@@ -200,7 +227,7 @@ struct RelayStateTests {
     }
 
     @Test
-    func testSessionEndDoesNotEraseReviewOrVerifiedOutcome() throws {
+    func testSessionEndDoesNotEraseReviewOrTerminalOutcome() throws {
         let base = Date(timeIntervalSince1970: 100)
         let evidence = try #require(CompletionEvidenceBundle([
             CompletionEvidence(kind: .testPassed, summary: "Verified tests passed")
@@ -224,6 +251,30 @@ struct RelayStateTests {
             occurredAt: base.addingTimeInterval(1),
             receivedAt: base.addingTimeInterval(1)
         ))
+        let retainedTerminalCases: [(RelayStatus, String, String)] = [
+            (.failed, "failed", "Failed safely"),
+            (.cancelled, "cancelled", "Cancelled safely")
+        ]
+        for (status, sessionID, summary) in retainedTerminalCases {
+            snapshot.apply(RelayEvent(
+                source: .claude,
+                sourceEvent: status.rawValue,
+                sessionID: sessionID,
+                status: status,
+                summary: summary,
+                occurredAt: base,
+                receivedAt: base
+            ))
+            snapshot.apply(RelayEvent(
+                source: .claude,
+                sourceEvent: "session_end",
+                sessionID: sessionID,
+                status: .ended,
+                summary: "Ended",
+                occurredAt: base.addingTimeInterval(1),
+                receivedAt: base.addingTimeInterval(1)
+            ))
+        }
         snapshot.apply(RelayEvent(
             source: .claude,
             sourceEvent: "verified",
@@ -245,6 +296,12 @@ struct RelayStateTests {
         ))
 
         #expect(snapshot.sessions["codex:review"]?.status == .readyToReview)
+        #expect(snapshot.sessions["claude:failed"]?.status == .failed)
+        #expect(snapshot.sessions["claude:failed"]?.summary == "Failed safely")
+        #expect(snapshot.sessions["claude:failed"]?.terminalAt == base)
+        #expect(snapshot.sessions["claude:cancelled"]?.status == .cancelled)
+        #expect(snapshot.sessions["claude:cancelled"]?.summary == "Cancelled safely")
+        #expect(snapshot.sessions["claude:cancelled"]?.terminalAt == base)
         #expect(snapshot.sessions["claude:completed"]?.status == .completed)
         #expect(snapshot.sessions["claude:completed"]?.terminalAt == base)
         #expect(snapshot.sessions["claude:completed"]?.summary == "Completed")

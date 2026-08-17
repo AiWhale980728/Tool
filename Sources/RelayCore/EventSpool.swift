@@ -22,6 +22,9 @@ public struct RelayStorePaths: Equatable, Sendable {
     public var quarantine: URL { root.appendingPathComponent("quarantine", isDirectory: true) }
     public var snapshot: URL { root.appendingPathComponent("state.json", isDirectory: false) }
     public var processingLock: URL { root.appendingPathComponent("processor.lock", isDirectory: false) }
+    public var applicationInstanceLock: URL {
+        root.appendingPathComponent("application-instance.lock", isDirectory: false)
+    }
     public var daemonHealth: URL { root.appendingPathComponent("daemon.json", isDirectory: false) }
 }
 
@@ -237,7 +240,13 @@ public struct RelayProcessor: Sendable {
         }
 
         var snapshot = try stateStore.load(fileManager: fileManager)
-        let removed = snapshot.pruneExpired()
+        let attentionStore = LocalTaskAttentionStore(root: spool.paths.root)
+        let protectedSessionKeys = Set(
+            attentionStore.load().compactMap { key, level in
+                level == .pinned ? key : nil
+            }
+        )
+        let removed = snapshot.pruneExpired(protectedSessionKeys: protectedSessionKeys)
         report.cleanedUp = removed.count
         if !removed.isEmpty {
             try stateStore.persist(snapshot, fileManager: fileManager)
@@ -257,11 +266,12 @@ public struct RelayProcessor: Sendable {
             }
         }
 
-        let newlyExpired = snapshot.pruneExpired()
+        let newlyExpired = snapshot.pruneExpired(protectedSessionKeys: protectedSessionKeys)
         if !newlyExpired.isEmpty {
             report.cleanedUp += newlyExpired.count
             try stateStore.persist(snapshot, fileManager: fileManager)
         }
+        try? attentionStore.prune(keeping: Set(snapshot.sessions.keys))
 
         return report
     }

@@ -47,8 +47,12 @@ public enum HookPayloadAdapter {
             status = .ended
             summary = "Codex session ended"
         case "permissionrequest":
-            status = .needsPermission
-            if let tool = safeLabel(firstString(payload, keys: ["tool_name", "tool"])) {
+            let tool = safeLabel(firstString(payload, keys: ["tool_name", "tool"]))
+            // Codex App connector requests can be resolved by Codex's own reviewer.
+            // The hook proves that a permission decision ran, not that a human prompt
+            // remains open. Keep those tasks running until a live user-wait signal exists.
+            status = tool?.hasPrefix("mcp__codex_apps__") == true ? .running : .needsPermission
+            if let tool {
                 summary = "Codex requires permission for \(tool)"
             } else {
                 summary = "Codex requires permission"

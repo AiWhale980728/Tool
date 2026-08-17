@@ -40,7 +40,7 @@ struct IntegrationConfigurationTests {
         )
 
         #expect(edit.changed)
-        #expect(edit.addedHandlers == 4)
+        #expect(edit.addedHandlers == 6)
         #expect(edit.removedHandlers == 0)
         let proposed = try #require(edit.proposedData)
         let object = try #require(JSONSerialization.jsonObject(with: proposed) as? [String: Any])
@@ -51,7 +51,9 @@ struct IntegrationConfigurationTests {
         #expect(string.contains("/usr/bin/existing-hook"))
         #expect(string.contains(ManagedHookCommand.marker))
         #expect(string.contains("'/Applications/Notch Relay/relayctl'"))
-        #expect(try HookConfigurationEditor.managedHandlerCount(in: proposed, file: file) == 4)
+        #expect(try HookConfigurationEditor.managedHandlerCount(in: proposed, file: file) == 6)
+        #expect(string.contains("\"UserPromptSubmit\""))
+        #expect(string.contains("\"PostToolUse\""))
         #expect(!edit.diff.isEmpty)
     }
 
@@ -78,7 +80,7 @@ struct IntegrationConfigurationTests {
             storeRoot: root
         )
         #expect(!second.changed)
-        #expect(try HookConfigurationEditor.managedHandlerCount(in: Data(contentsOf: file), file: file) == 6)
+        #expect(try HookConfigurationEditor.managedHandlerCount(in: Data(contentsOf: file), file: file) == 8)
 
         let updated = try HookConfigurationEditor.makeEdit(
             target: .claude,

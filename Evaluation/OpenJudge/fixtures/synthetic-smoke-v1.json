@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "datasetID": "completion-review-synthetic-smoke-v1",
+  "datasetKind": "synthetic_smoke",
+  "thresholds": {
+    "minimumAccuracy": 1.0,
+    "minimumPrecision": 1.0,
+    "minimumRecall": 1.0
+  },
+  "cases": [
+    {"id": "supported-complete-evidence", "category": "grounding", "label": true},
+    {"id": "rejected-missing-evidence", "category": "grounding", "label": false},
+    {"id": "supported-low-risk", "category": "risk", "label": true},
+    {"id": "rejected-critical-risk", "category": "risk", "label": false},
+    {"id": "supported-current-identity", "category": "identity", "label": true},
+    {"id": "rejected-cross-task", "category": "identity", "label": false}
+  ]
+}

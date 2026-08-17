@@ -4,12 +4,12 @@ import RelayCore
 
 @main
 struct RelayCLI {
-    static func main() {
+    static func main() async {
         let arguments = Array(CommandLine.arguments.dropFirst())
         let failOpen = arguments.contains("--fail-open")
 
         do {
-            try run(arguments)
+            try await run(arguments)
         } catch {
             writeError("relayctl: \(error.localizedDescription)")
             if !failOpen {
@@ -18,7 +18,7 @@ struct RelayCLI {
         }
     }
 
-    private static func run(_ arguments: [String]) throws {
+    private static func run(_ arguments: [String]) async throws {
         guard let command = arguments.first else {
             printUsage()
             return
@@ -42,6 +42,8 @@ struct RelayCLI {
             try integration(commandArguments)
         case "doctor":
             try doctor(commandArguments)
+        case "quota":
+            try await quota(commandArguments)
         case "help", "--help", "-h":
             printUsage()
         default:
@@ -290,14 +292,15 @@ struct RelayCLI {
             passed: fileManager.fileExists(atPath: layout.launchAgent.path),
             detail: layout.launchAgent.path
         ))
-        checks.append(configurationDoctorCheck(target: .codex, file: layout.codexConfiguration, expected: 4))
-        checks.append(configurationDoctorCheck(target: .claude, file: layout.claudeConfiguration, expected: 6))
+        checks.append(configurationDoctorCheck(target: .codex, file: layout.codexConfiguration, expected: 6))
+        checks.append(configurationDoctorCheck(target: .claude, file: layout.claudeConfiguration, expected: 8))
 
         let healthStore = RelayDaemonHealthStore(paths: RelayStorePaths(root: layout.storeRoot))
         do {
             if let health = try healthStore.load() {
                 let age = Date().timeIntervalSince(health.lastPassAt)
-                let processIsAlive = Darwin.kill(health.processID, 0) == 0
+                let probe = Darwin.kill(health.processID, 0)
+                let processIsAlive = probe == 0 || Darwin.errno == EPERM
                 checks.append(DoctorCheck(
                     name: "daemon heartbeat",
                     passed: age <= 5 && health.lastError == nil && processIsAlive,
@@ -321,6 +324,33 @@ struct RelayCLI {
         }
         if checks.contains(where: { !$0.passed }) {
             Foundation.exit(EXIT_FAILURE)
+        }
+    }
+
+    private static func quota(_ arguments: [String]) async throws {
+        let parsed = try ParsedArguments(arguments, valueOptions: [], flags: ["--json"])
+        let snapshot: AgentQuotaSnapshot
+        do {
+            snapshot = try await CodexQuotaProbe().fetch()
+        } catch let error as CodexQuotaProbeError {
+            throw CLIError.runtime("Codex quota probe failed safely (\(error)).")
+        }
+
+        if parsed.hasFlag("--json") {
+            let data = try RelayJSON.makeEncoder(prettyPrinted: true).encode(snapshot)
+            print(String(decoding: data, as: UTF8.self))
+            return
+        }
+
+        print("Codex quota · plan=\(snapshot.plan ?? "unknown")")
+        for window in snapshot.windows {
+            let reset = window.resetsAt.map { " · resets \($0.formatted())" } ?? ""
+            print("\(window.displayName): \(Int(window.remainingPercent.rounded()))% remaining\(reset)")
+        }
+        if snapshot.creditsUnlimited {
+            print("Codex credits: unlimited")
+        } else if let credits = snapshot.creditsRemaining {
+            print("Codex credits: \(credits.formatted(.number.precision(.fractionLength(0...2))))")
         }
     }
 
@@ -483,6 +513,7 @@ struct RelayCLI {
               relayctl integration install [path overrides] [--apply]
               relayctl integration uninstall [path overrides] [--apply]
               relayctl doctor [path overrides] [--json]
+              relayctl quota [--json]
 
             Statuses: running, needs_input, needs_permission, ready_to_review, failed, completed, cancelled, ended
             """

@@ -15,9 +15,50 @@ if rg -n -i --hidden \
     -g '!.build*/**' \
     -g '!.git/**' \
     -g '!scripts/audit-origin.sh' \
+    -g '!README.md' \
     -g '!LICENSE' \
+    -g '!THIRD_PARTY_NOTICES.md' \
+    -g '!Package.swift' \
+    -g '!Package.resolved' \
+    -g '!Evaluation/OpenJudge/pyproject.toml' \
+    -g '!Evaluation/OpenJudge/uv.lock' \
+    -g '!Evaluation/LabelStudio/README.md' \
     "$foreign_pattern" .; then
     print -u2 "origin audit failed: foreign project, attribution, generator, or repository trace found"
+    exit 1
+fi
+
+owned_readme_repository_pattern='^https://github\.com/HiWhaleW/notch-relay(\.git|/issues)?$'
+if rg -o 'https://github\.com/[A-Za-z0-9._/-]+' README.md \
+    | rg -v "$owned_readme_repository_pattern"; then
+    print -u2 "origin audit failed: README links to an unapproved GitHub repository"
+    exit 1
+fi
+
+private_prompt_files=(
+    Sources/NotchRelayApp/Resources/private-completion-review-system-prompt.txt
+    Sources/NotchRelayApp/Resources/private-independent-evaluator-system-prompt.txt
+)
+for prompt_file in "${private_prompt_files[@]}"; do
+    if [[ -f "$prompt_file" ]] && ! git check-ignore -q -- "$prompt_file"; then
+        print -u2 "origin audit failed: private Supervisor prompt is not ignored"
+        exit 1
+    fi
+done
+if rg -n \
+    -g '!**/Resources/private-completion-review-system-prompt.txt' \
+    -g '!**/Resources/private-independent-evaluator-system-prompt.txt' \
+    'You are (the Completion Review supervisor|an independent evaluator) for Notch Relay' \
+    Sources; then
+    print -u2 "origin audit failed: private Supervisor prompt text exists in publishable source"
+    exit 1
+fi
+
+if [[ ! -f THIRD_PARTY_NOTICES.md ]] \
+    || ! rg -Fq 'https://github.com/Richard-Yang0130/Perch' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq '077050640717d7a14337376b0ee1addbb0fd9c12' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Copyright (c) 2026 Peter Steinberger' THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: registered Perch source, pinned commit, or MIT notice is missing"
     exit 1
 fi
 
@@ -29,15 +70,124 @@ if [[ ! -f LICENSE ]] \
     exit 1
 fi
 
-if rg -n 'package\s*\(\s*url:' Package.swift; then
-    print -u2 "origin audit failed: third-party Swift package dependency found"
+if ! rg -Fq 'https://github.com/swiftlang/swift-subprocess.git' Package.swift \
+    || ! rg -Fq 'exact: "1.0.0"' Package.swift \
+    || ! rg -Fq '"revision" : "b3937ab85dd32f6e9435914599c1519074769c1a"' Package.resolved \
+    || ! rg -Fq '"revision" : "869129b7bf4ecc57b97d0193ad29690ca2134750"' Package.resolved; then
+    print -u2 "origin audit failed: approved Swift dependency or resolved revision is missing"
+    exit 1
+fi
+
+if ! rg -Fq 'https://github.com/swiftlang/swift-subprocess' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'https://github.com/apple/swift-system' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'https://github.com/pytest-dev/pytest' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'https://github.com/jestjs/jest' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'https://github.com/nextest-rs/nextest' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq '746f2a0f57c56e3bba555280f0587d40f3db95c0' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq '60fa45f638ffc3f35e74afa65737f45fcd32db2a' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Copyright (c) 2004 Holger Krekel and others' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Copyright (c) Meta Platforms, Inc. and affiliates.' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Copyright (c) The nextest Contributors' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Apache License' THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: approved dependency source or license notice is missing"
+    exit 1
+fi
+
+if ! rg -Fq 'static let supportedNextestVersion = "0.9.143"' \
+    Sources/RelayCore/Supervisor/LocalCargoNextestVerificationEvidenceAdapter.swift \
+    || ! rg -Fq 'Reviewed version: `0.9.143`' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Reviewed commit: `60fa45f638ffc3f35e74afa65737f45fcd32db2a`' \
+    THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'License: MIT OR Apache-2.0' THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: reviewed cargo-nextest version, commit, license, or adapter pin is missing"
+    exit 1
+fi
+
+if ! rg -Fq 'static let supportedJestVersion = "30.4.2"' \
+    Sources/RelayCore/Supervisor/LocalJestVerificationEvidenceAdapter.swift \
+    || ! rg -Fq 'Reviewed version: `30.4.2`' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Reviewed commit: `746f2a0f57c56e3bba555280f0587d40f3db95c0`' \
+    THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: reviewed Jest version, commit, or adapter pin is missing"
+    exit 1
+fi
+
+openjudge_commit='33db7c4a19170142c14a20df32ebaeff1d8d47e4'
+openjudge_source='https://github.com/agentscope-ai/OpenJudge.git'
+if [[ ! -f Evaluation/OpenJudge/pyproject.toml ]] \
+    || [[ ! -f Evaluation/OpenJudge/uv.lock ]] \
+    || [[ ! -f Evaluation/OpenJudge/run_gold_set.py ]] \
+    || [[ ! -f scripts/verify-openjudge-evaluation.sh ]] \
+    || ! rg -Fq "py-openjudge @ git+$openjudge_source@$openjudge_commit" \
+        Evaluation/OpenJudge/pyproject.toml \
+    || ! rg -Fq "source = { git = \"$openjudge_source?rev=$openjudge_commit#$openjudge_commit\" }" \
+        Evaluation/OpenJudge/uv.lock \
+    || ! rg -Fq 'name = "py-openjudge"' Evaluation/OpenJudge/uv.lock \
+    || ! rg -Fq 'version = "0.2.0"' Evaluation/OpenJudge/uv.lock \
+    || ! rg -Fq 'EXPECTED_OPENJUDGE_VERSION = "0.2.0"' Evaluation/OpenJudge/run_gold_set.py \
+    || ! rg -Fq -- '--offline' scripts/verify-openjudge-evaluation.sh \
+    || ! rg -Fq -- '--locked' scripts/verify-openjudge-evaluation.sh; then
+    print -u2 "origin audit failed: pinned OpenJudge offline evaluation dependency is missing or changed"
+    exit 1
+fi
+
+if ! rg -Fq 'Source: https://github.com/agentscope-ai/OpenJudge' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Upstream tag: `v0.2.2`' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq "Reviewed commit: \`$openjudge_commit\`" THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Reported package version: `0.2.0`' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'License: Apache-2.0' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'not bundled in the macOS application' THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: OpenJudge source, pin, license, or distribution boundary is missing"
+    exit 1
+fi
+
+if rg -n -i 'openjudge|py-openjudge' Sources Package.swift Package.resolved; then
+    print -u2 "origin audit failed: OpenJudge must remain outside the native application runtime"
+    exit 1
+fi
+
+labelstudio_commit='2a9bfbcbf0a844b999de97e601d16050a893f5fb'
+labelstudio_digest='sha256:aa461572e8f9d86a1bf9520c1db620204e86160fd2f80dd7e9d40ac84a8828ea'
+if [[ ! -f Evaluation/LabelStudio/compose.yaml ]] \
+    || [[ ! -f Evaluation/LabelStudio/labeling-config.xml ]] \
+    || [[ ! -f Evaluation/LabelStudio/export_gold_set.py ]] \
+    || [[ ! -f Evaluation/LabelStudio/approved-thresholds-template.json ]] \
+    || [[ ! -f scripts/verify-labelstudio-evaluation.sh ]] \
+    || ! rg -Fq "heartexlabs/label-studio:1.23.0@$labelstudio_digest" \
+        Evaluation/LabelStudio/compose.yaml \
+    || ! rg -Fq '"127.0.0.1:8080:8080"' Evaluation/LabelStudio/compose.yaml \
+    || ! rg -Fq 'pull_policy: never' Evaluation/LabelStudio/compose.yaml \
+    || ! rg -Fq 'internal: true' Evaluation/LabelStudio/compose.yaml \
+    || ! rg -Fq 'PRODUCTION_MINIMUM_CASES = 100' \
+        Evaluation/LabelStudio/export_gold_set.py \
+    || ! rg -Fq 'PRODUCTION_MINIMUM_CASES_PER_CATEGORY = 20' \
+        Evaluation/LabelStudio/export_gold_set.py \
+    || ! rg -Fq -- '--offline' scripts/verify-labelstudio-evaluation.sh \
+    || ! rg -Fq -- '--locked' scripts/verify-labelstudio-evaluation.sh; then
+    print -u2 "origin audit failed: pinned Label Studio annotation workflow is missing or changed"
+    exit 1
+fi
+
+if ! rg -Fq 'Source: https://github.com/HumanSignal/label-studio' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Reviewed version: `1.23.0`' THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq "Reviewed release commit: \`$labelstudio_commit\`" THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq "$labelstudio_digest" THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'Copyright (c) 2019-2021 Heartex, Inc. All Rights Reserved.' \
+        THIRD_PARTY_NOTICES.md \
+    || ! rg -Fq 'not bundled in the macOS application' THIRD_PARTY_NOTICES.md; then
+    print -u2 "origin audit failed: Label Studio source, pin, notice, or distribution boundary is missing"
+    exit 1
+fi
+
+if rg -n -i 'label.?studio' Sources Package.swift Package.resolved; then
+    print -u2 "origin audit failed: Label Studio must remain outside the native application runtime"
     exit 1
 fi
 
 if rg -n '^import ' Sources Tests \
-    | rg -v 'import (Foundation|Darwin|RelayCore|Testing)$'; then
+    | rg -v 'import (AppKit|Carbon\.HIToolbox|Combine|CoreGraphics|CryptoKit|Foundation|ImageIO|Darwin|RelayCore|Security|Subprocess|SwiftUI|System|Testing|UniformTypeIdentifiers)$'; then
     print -u2 "origin audit failed: non-platform or non-project module import found"
     exit 1
 fi
 
-print "origin audit passed: no foreign project traces or third-party dependencies"
+print "origin audit passed: registered and pinned source reuse only"
